@@ -62,6 +62,9 @@ public class Philosopher {
                 fork2.setHeldBy(null);
                 eatingCount++;
                 System.out.println(name + " finished eating. Total times eaten: " + eatingCount);
+                if (uiPanel != null) {
+                    uiPanel.setEatingCount(eatingCount);  // Update panel label here
+                }
                 setStatus(THINKING, -1);
                 System.out.println(name + " starts thinking.");
             }
