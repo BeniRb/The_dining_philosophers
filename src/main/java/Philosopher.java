@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.Random;
 
 public class Philosopher {
@@ -5,6 +6,8 @@ public class Philosopher {
     public static final int WAITING_FOR_FORK_1 = 2;
     public static final int WAITING_FOR_FORK_2 = 3;
     public static final int EATING = 4;
+    public static final int STOPPED = 5;
+
     private PhilosopherPanel uiPanel;
 
     private String name;
@@ -12,22 +15,36 @@ public class Philosopher {
     private int eatingCount;
     private Fork fork1;
     private Fork fork2;
+    private volatile boolean stopped = false;
 
-    public Philosopher (String name, Fork fork1, Fork fork2,PhilosopherPanel Panel) {
+    public Philosopher(String name, Fork fork1, Fork fork2, PhilosopherPanel panel) {
         this.name = name;
         this.status = THINKING;
         this.eatingCount = 0;
         this.fork1 = fork1;
         this.fork2 = fork2;
-        this.uiPanel = Panel;
-        this.start();
-    }
+        this.uiPanel = panel;
 
+        // Add button listener
+        uiPanel.getStopButton().addActionListener(e -> {
+            stopped = !stopped;
+            uiPanel.getStopButton().setText(stopped ? "Resume" : "Stop");
+            uiPanel.getStopButton().setBackground(stopped ? Color.GRAY : Color.RED);
+        });
+
+        start();
+    }
 
     private void start() {
         new Thread(() -> {
             Random random = new Random();
             while (true) {
+                if (stopped) {
+                    setStatus(STOPPED, -1);
+                    Utils.sleep(500);
+                    continue;
+                }
+
                 setStatus(THINKING, -1);
                 System.out.println(this); // print philosopher status (thinking)
                 Utils.sleep(random.nextInt(5000)); // Thinking time
@@ -42,7 +59,7 @@ public class Philosopher {
                 }
                 System.out.println(name + " picked up fork " + fork1.getNumber());
 
-                Utils.sleep(random.nextInt(2000)); // small delay before second fork
+                Utils.sleep(random.nextInt(2000)); // delay before second fork
 
                 setStatus(WAITING_FOR_FORK_2, fork2.getNumber());
                 System.out.println(this); // print waiting for fork 2
@@ -63,30 +80,32 @@ public class Philosopher {
                 eatingCount++;
                 System.out.println(name + " finished eating. Total times eaten: " + eatingCount);
                 if (uiPanel != null) {
-                    uiPanel.setEatingCount(eatingCount);  // Update panel label here
+                    uiPanel.setEatingCount(eatingCount);  // Update panel label
                 }
                 setStatus(THINKING, -1);
                 System.out.println(name + " starts thinking.");
             }
         }).start();
     }
-    private void setStatus(int newStatus,int forkNumber) {
+
+    private void setStatus(int newStatus, int forkNumber) {
         this.status = newStatus;
         if (uiPanel != null) {
-            uiPanel.setStatus(newStatus,forkNumber);
+            uiPanel.setStatus(newStatus, forkNumber);
         }
     }
 
-    public String getName () {
+    public String getName() {
         return this.name;
     }
 
-    public String toString () {
+    public String toString() {
         String statusText = switch (this.status) {
-            case THINKING ->  "thinking ";
-            case WAITING_FOR_FORK_1 ->  "waiting for fork " + this.fork1.getNumber();
+            case THINKING -> "thinking ";
+            case WAITING_FOR_FORK_1 -> "waiting for fork " + this.fork1.getNumber();
             case WAITING_FOR_FORK_2 -> "waiting for fork " + this.fork2.getNumber();
             case EATING -> "eating ";
+            case STOPPED -> "stopped ";
             default -> "";
         };
         return "Philosopher " + this.name + " is currently " + statusText
