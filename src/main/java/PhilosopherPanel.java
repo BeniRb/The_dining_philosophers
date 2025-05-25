@@ -29,30 +29,29 @@ public class PhilosopherPanel extends JPanel {
     }
 
     public void setStatus(int state, int forkNumber) {
-        SwingUtilities.invokeLater(() -> {
-            switch (state) {
-                case Philosopher.THINKING -> {
-                    statusLabel.setText("Thinking");
-                    setBackground(Color.CYAN);
-                }
-                case Philosopher.WAITING_FOR_FORK_1, Philosopher.WAITING_FOR_FORK_2 -> {
-                    statusLabel.setText("Waiting for fork " + forkNumber);
-                    setBackground(Color.ORANGE);
-                }
-                case Philosopher.EATING -> {
-                    statusLabel.setText("Eating");
-                    setBackground(Color.GREEN);
-                }
-                case Philosopher.STOPPED -> {
-                    statusLabel.setText("Stopped");
-                    setBackground(Color.LIGHT_GRAY);
-                }
+        switch (state) {
+            case Philosopher.THINKING -> {
+                statusLabel.setText("Thinking");
+                setBackground(Color.CYAN);
             }
-        });
+            case Philosopher.WAITING_FOR_FORK_1, Philosopher.WAITING_FOR_FORK_2 -> {
+                statusLabel.setText("Waiting for fork " + forkNumber);
+                setBackground(Color.ORANGE);
+            }
+            case Philosopher.EATING -> {
+                statusLabel.setText("Eating");
+                setBackground(Color.GREEN);
+            }
+            case Philosopher.STOPPED -> {
+                statusLabel.setText("Stopped");
+                setBackground(Color.LIGHT_GRAY);
+            }
+        }
     }
 
+
     public void setEatingCount(int count) {
-        SwingUtilities.invokeLater(() -> eatingCountLabel.setText("Times eaten: " + count));
+        eatingCountLabel.setText("Times eaten: " + count);
     }
 
     public JButton getStopButton() {
